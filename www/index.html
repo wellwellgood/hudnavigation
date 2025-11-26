@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#000000" />
+    <title>HUD Navi</title>
+
+    <!-- MapLibre 스타일 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.12.0/dist/maplibre-gl.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+        color: #0ff;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      /* 전체 지도 */
+      #map {
+        position: fixed;
+        inset: 0; /* top:0; right:0; bottom:0; left:0 */
+      }
+
+      /* 검색 박스 */
+      #searchBox {
+        position: fixed;
+        left: calc(env(safe-area-inset-left, 0px) + 12px);
+        top: calc(env(safe-area-inset-top, 0px) + 12px);
+        z-index: 2000;
+      }
+      #searchBox input {
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: 1px solid #2dd4bf;
+        background: rgba(0, 0, 0, 0.6);
+        color: #0ff;
+        min-width: 180px;
+      }
+
+      /* 속도/방향 HUD */
+      .hud {
+        position: fixed;
+        left: calc(env(safe-area-inset-left, 0px) + 12px);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+        gap: 8px;
+        pointer-events: none;
+      }
+      .chip {
+        pointer-events: auto;
+        padding: 6px 10px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #0ff;
+        border-radius: 8px;
+        border: 1px solid #2dd4bf;
+        font-size: 12px;
+      }
+
+      /* Pitch 컨트롤 (#ctrl) - body 안 + z-index 낮게 */
+      #ctrl {
+        position: fixed;
+        right: calc(env(safe-area-inset-right, 0px) + 12px);
+        top: calc(env(safe-area-inset-top, 0px) + 60px);
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.55);
+        color: #0ff;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font: 600 12px ui-monospace, monospace;
+        z-index: 500; /* 위치/북쪽 고정 버튼보다 아래 */
+      }
+      #ctrl button {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 4px 8px;
+        border: 1px solid #2dd4bf;
+        color: #0ff;
+        border-radius: 6px;
+      }
+      #ctrl input[type="range"] {
+        accent-color: #0ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- 지도 -->
+    <div id="map"></div>
+
+    <!-- 검색 UI -->
+    <div id="searchBox">
+      <form id="searchForm"> 
+          <input id="q" placeholder="장소 검색…" />
+          <button type="submit" style="
+              padding: 6px 12px;
+              margin-left: 8px;
+              border-radius: 8px;
+              border: 1px solid #2dd4bf;
+              background: rgba(0, 0, 0, 0.6);
+              border-radius: 100px;
+              color: #0ff;
+              cursor: pointer;
+          ">검색</button>
+      </form>
+  </div>
+
+    <!-- 속도/방향 HUD -->
+    <div class="hud">
+      <div class="chip" id="spd">0 km/h</div>
+      <div class="chip" id="brg">0°</div>
+    </div>
+
+    <!-- MapLibre 스크립트 (이거 없으면 maplibregl undefined) -->
+    <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.12.0/dist/maplibre-gl.js"></script>
+    <!-- 너가 만든 HUD+네비 로직 -->
+    <script src="./app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/service-worker.js")
+            .then((reg) => {
+              console.log("SW registered", reg.scope);
+            })
+            .catch((err) => {
+              console.error("SW registration failed", err);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
